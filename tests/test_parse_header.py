@@ -1,5 +1,5 @@
 from pathlib import Path
-from pdb import set_trace
+from linc.models import PolatizationEnum
 
 from linc.parse.header import parse_header
 from linc.parse.file import read_file_header_dataset
@@ -13,4 +13,9 @@ def test_read_header():
     header = parse_header(h.split(b"\r\n"))
 
     assert header.location == "Medellin"
-    assert header.
+    assert list(map(lambda x: x.polatization, header.channels)) == [
+        PolatizationEnum.PARALLEL,
+        PolatizationEnum.PARALLEL,
+        PolatizationEnum.CROSSED,
+        PolatizationEnum.CROSSED,
+    ]

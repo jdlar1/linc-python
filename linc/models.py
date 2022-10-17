@@ -6,11 +6,11 @@ from pydantic import BaseModel, validator
 
 
 class LaserPolarizationEnum(str, Enum):
-    NONE = 0
-    VERTICAL = 1
-    HORIZONTAL = 2
-    RIGHT_CIRCULAR = 3
-    LEFT_CIRCULAR = 4
+    NONE = "0"
+    VERTICAL = "1"
+    HORIZONTAL = "2"
+    RIGHT_CIRCULAR = "3"
+    LEFT_CIRCULAR = "4"
 
 
 class PolatizationEnum(str, Enum):
@@ -38,11 +38,11 @@ class Channel(BaseModel):
     type: int
     laser: int
     bins: int
-    laser_polarization: int
+    laser_polarization: LaserPolarizationEnum = LaserPolarizationEnum.NONE
     ptm_voltage: int
     binwidth: float
     wavelength: int
-    polatization: PolatizationEnum = PolatizationEnum.PARALLEL
+    polatization: PolatizationEnum = PolatizationEnum.NONE
     adc_bits: int
     shots: int
     dc_dr: float  # Discriminator level () or data range

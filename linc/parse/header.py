@@ -69,7 +69,7 @@ def parse_channels(channels_lines: list[bytes]) -> tuple[Channel]:
                 type=pl[1],
                 laser=pl[2],
                 bins=pl[3],
-                laser_polarization=pl[4],
+                laser_polarization=pl[4].decode(),
                 ptm_voltage=pl[5],
                 binwidth=pl[6],
                 wavelength=channel_physics[0],
