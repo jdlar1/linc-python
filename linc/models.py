@@ -80,10 +80,16 @@ class DataFileU32(BaseModel):
     def dataset_length_must_match_header(cls, v, values):
         _header: Header = values["header"]
 
-        if _header.n_datasets != len(v):
-            raise ValueError(f"Header n_datasets ({_header.n_datasets}) and dataset length ({v.shape[0]}) must match")
+        # Header shape: (datasets x max bin of single profile)
+        header_shape = (_header.n_datasets, max(map(lambda x: x.bins , _header.channels)))
+        if v.shape != header_shape:
+            raise ValueError(f"Header shape: {header_shape} does not match with dataset shape {v.shape}")
         
         return v
         
     class Config:
         arbitrary_types_allowed = True
+
+
+class DataFile(DataFileU32):
+    dataset: npt.NDArray[np.float64]

@@ -1,5 +1,4 @@
 from pathlib import Path
-from pdb import set_trace
 
 from linc.models import DataFileU32
 from linc.parse.header import parse_header
@@ -9,9 +8,9 @@ from linc.parse.file import read_file_header_dataset
 # from rich import print
 
 
-def test_read_dataset():
-    path = Path("tests") / "data" / "2022" / "07" / "14" / "RS2271411.481095"
-    h, d = read_file_header_dataset(path)
+def parse_file(file_path: str | Path):
+    _p = Path(file_path)
+    h, d = read_file_header_dataset(_p)
 
     header = parse_header(h.split(b"\r\n"))
     dataset = parse_dataset(d, header=header)
