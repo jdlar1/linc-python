@@ -22,6 +22,15 @@ class PolatizationEnum(str, Enum):
     LEFT_CIRCULAR = "l"
 
 
+class MeasurementTypeEnum(str, Enum):
+    ANALOG = "BT"
+    PHOTONCOUNTING = "BC"
+    ANALOG_SQUARED = "S2A"
+    PHOTONCOUNTING_SQUARED = "S2P"
+    POWERMETER_PHOTODIODE = "PD"
+    POWERMETER = "PM"
+
+
 class FileTypeEnum(str, Enum):
     RAW_SIGNAL = "RS"
     DARK_CURRENT = "DC"
@@ -34,9 +43,13 @@ class Laser(BaseModel):
     frecuency: int
 
 
+class DeviceId(BaseModel):
+    number: int
+    type: MeasurementTypeEnum
+
+
 class Channel(BaseModel):
     active: bool
-    type: int
     laser: int
     bins: int
     laser_polarization: LaserPolarizationEnum = LaserPolarizationEnum.NONE
@@ -47,7 +60,7 @@ class Channel(BaseModel):
     adc_bits: int
     shots: int
     dc_dr: float  # Discriminator level () or data range
-    device_id: str
+    device_id: DeviceId
 
 
 class Header(BaseModel):
@@ -72,6 +85,7 @@ class Header(BaseModel):
     # def check_laser_on_channel(cls, v, _):
     #     return v
 
+
 class DataFileU32(BaseModel):
     header: Header
     dataset: npt.NDArray[np.uint8]
@@ -81,12 +95,17 @@ class DataFileU32(BaseModel):
         _header: Header = values["header"]
 
         # Header shape: (datasets x max bin of single profile)
-        header_shape = (_header.n_datasets, max(map(lambda x: x.bins , _header.channels)))
+        header_shape = (
+            _header.n_datasets,
+            max(map(lambda x: x.bins, _header.channels)),
+        )
         if v.shape != header_shape:
-            raise ValueError(f"Header shape: {header_shape} does not match with dataset shape {v.shape}")
-        
+            raise ValueError(
+                f"Header shape: {header_shape} does not match with dataset shape {v.shape}"
+            )
+
         return v
-        
+
     class Config:
         arbitrary_types_allowed = True
 
