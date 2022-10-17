@@ -12,6 +12,8 @@ def test_read_header():
     h, _ = read_file_header_dataset(path)
     header = parse_header(h.split(b"\r\n"))
 
+    print(header)
+
     assert header.location == "Medellin"
     assert list(map(lambda x: x.polatization, header.channels)) == [
         PolatizationEnum.PARALLEL,

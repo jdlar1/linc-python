@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import Any
 
-from ..models import DataFile
+from ..models import DataFileU32
 
 
 # def parse_file(file_path: Path | str) -> DataFile:

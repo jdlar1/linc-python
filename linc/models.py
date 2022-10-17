@@ -2,7 +2,8 @@ from enum import Enum
 from datetime import datetime
 
 import numpy as np
-from pydantic import BaseModel, validator
+import numpy.typing as npt
+from pydantic import BaseModel, validator, Field
 
 
 class LaserPolarizationEnum(str, Enum):
@@ -71,16 +72,18 @@ class Header(BaseModel):
     # def check_laser_on_channel(cls, v, _):
     #     return v
 
-class DataFile(BaseModel):
+class DataFileU32(BaseModel):
     header: Header
-    dataset: np.ndarray | None = None
+    dataset: npt.NDArray[np.uint8]
 
     @validator("dataset")
     def dataset_length_must_match_header(cls, v, values):
         _header: Header = values["header"]
 
         if _header.n_datasets != len(v):
-            raise ValueError(f"Header n_datasets ({_header.n_datasets}) and dataset length ({len(v)}) must match")
+            raise ValueError(f"Header n_datasets ({_header.n_datasets}) and dataset length ({v.shape[0]}) must match")
+        
+        return v
         
     class Config:
         arbitrary_types_allowed = True
