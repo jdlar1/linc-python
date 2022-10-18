@@ -1,7 +1,7 @@
 import numpy as np
 import numpy.typing as npt
 
-from .models import Channel, DataFile, DataFileU32, DeviceId, MeasurementTypeEnum
+from .models import Channel, DataFile, DataFileU32, MeasurementTypeEnum
 
 SQUARED_CHANNELS = [
     MeasurementTypeEnum.ANALOG_SQUARED,
