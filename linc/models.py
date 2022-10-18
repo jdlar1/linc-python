@@ -14,7 +14,7 @@ class LaserPolarizationEnum(str, Enum):
     LEFT_CIRCULAR = "4"
 
 
-class PolatizationEnum(str, Enum):
+class PolarizationEnum(str, Enum):
     NONE = "o"
     PARALLEL = "p"
     CROSSED = "s"
@@ -56,7 +56,7 @@ class Channel(BaseModel):
     ptm_voltage: int
     binwidth: float
     wavelength: int
-    polatization: PolatizationEnum = PolatizationEnum.NONE
+    polarization: PolarizationEnum = PolarizationEnum.NONE
     adc_bits: int
     shots: int
     dc_dr: float  # Discriminator level () or data range

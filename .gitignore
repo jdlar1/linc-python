@@ -12,3 +12,6 @@ __pycache__/
 
 # Outputs
 output.nc
+
+# Development files
+test.ipynb

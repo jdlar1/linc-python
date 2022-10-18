@@ -1,5 +1,6 @@
 # type: ignore
 from datetime import datetime
+from pdb import set_trace
 
 from ..models import Channel, DeviceId, Header, Laser
 from ..utils import safe_get_list
@@ -73,7 +74,7 @@ def parse_channels(channels_lines: list[bytes]) -> tuple[Channel]:
                 ptm_voltage=pl[5],
                 binwidth=pl[6],
                 wavelength=channel_physics[0],
-                polatization=channel_physics[1].decode(),
+                polarization=channel_physics[1].decode(),
                 adc_bits=pl[12],
                 shots=pl[13],
                 dc_dr=pl[14],
