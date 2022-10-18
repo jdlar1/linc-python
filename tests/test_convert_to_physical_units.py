@@ -1,4 +1,3 @@
-from pdb import set_trace
 from math import isclose
 
 import numpy as np
@@ -7,7 +6,6 @@ from linc.convertion import convert_to_physical_units
 
 def test_physical_units_converter(data_file_u32):
     phys = convert_to_physical_units(data_file_u32)
-
 
     # Compare against Licel conversion 0.1% Precision
     assert isclose(phys.dataset[0, 0], 5.30002, rel_tol=0.001)

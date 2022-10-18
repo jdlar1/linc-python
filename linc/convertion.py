@@ -1,7 +1,5 @@
-from pdb import set_trace
 import numpy as np
 import numpy.typing as npt
-from rich import print
 
 from .models import Channel, DataFile, DataFileU32, DeviceId, MeasurementTypeEnum
 
@@ -27,10 +25,6 @@ def convert_to_physical_units(data_file: DataFileU32) -> DataFile:
             enumerate(data_file.header.channels),
         )
     )
-
-    print()
-    print(f"squared channels: {[c[1].device_id for c in squared_channels]}")
-    print(f"measurement channels: {[c[1].device_id for c in measurement_channels]}")
 
     # First iterate over normal channels
     for idx, channel in measurement_channels:

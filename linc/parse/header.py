@@ -77,16 +77,16 @@ def parse_channels(channels_lines: list[bytes]) -> tuple[Channel]:
                 adc_bits=pl[12],
                 shots=pl[13],
                 dc_dr=pl[14],
-                device_id=parse_device_id(pl[15]) 
+                device_id=parse_device_id(pl[15]),
             )
         )
 
     return tuple(channels)  # Tuple used to guarantee integrity
 
 
-def parse_device_id(bytes_id: bytes)-> DeviceId:
+def parse_device_id(bytes_id: bytes) -> DeviceId:
     device_id = bytes_id.decode()
-    sep_index =  3 if device_id.startswith("S2") else 2
+    sep_index = 3 if device_id.startswith("S2") else 2
 
     # set_trace()
     return DeviceId(type=device_id[:sep_index], number=device_id[sep_index:])
