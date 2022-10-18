@@ -1,6 +1,5 @@
 # type: ignore
 from datetime import datetime
-from pdb import set_trace
 
 from ..models import Channel, DeviceId, Header, Laser
 from ..utils import safe_get_list

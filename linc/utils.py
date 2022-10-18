@@ -1,6 +1,7 @@
 from typing import TypeVar, Iterator
 
 
+U = TypeVar("U")
 T = TypeVar("T", str, bytes)
 
 
@@ -14,9 +15,6 @@ def split_seq(seq: list[T], sep: T) -> Iterator[list[T]]:
         except ValueError:
             yield seq[start:]
             break
-
-
-U = TypeVar("U")
 
 
 def safe_get_list(l: list[U], idx: int, default: U) -> U:
