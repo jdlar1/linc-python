@@ -33,7 +33,7 @@ def convert_to_physical_units(data_file: DataFileU32) -> DataFile:
     print(f"measurement channels: {[c[1].device_id for c in measurement_channels]}")
 
     # First iterate over normal channels
-    for idx, channel in enumerate(data_file.header.channels):
+    for idx, channel in measurement_channels:
         final_dataset[idx] = _to_physical(channel, final_dataset[idx])
 
     for idx, channel in squared_channels:
@@ -83,9 +83,17 @@ def _to_standard_deviation(
 ) -> npt.NDArray[np.float64]:
     match channel.device_id.type:
         case MeasurementTypeEnum.ANALOG_SQUARED:
-            _s = (1000 * dataset * channel.dc_dr) / np.sqrt(channel.shots)
+            _s = (
+                (1000 * dataset * channel.dc_dr)
+                / (channel.shots * (2**channel.adc_bits - 1))
+                / np.sqrt(channel.shots - 1)
+            )
         case MeasurementTypeEnum.PHOTONCOUNTING_SQUARED:
-            _s = _s = (1000 * dataset * channel.dc_dr) / np.sqrt(channel.shots)
+            _s = (
+                (1000 * dataset * channel.dc_dr)
+                / (channel.shots * (2**channel.adc_bits - 1))
+                / np.sqrt(channel.shots)
+            )
         case default:
             raise ValueError(f"Channel not handled: {default}")
     return _s
