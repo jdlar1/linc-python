@@ -37,13 +37,6 @@ def convert_to_physical_units(data_file: DataFileU32) -> DataFile:
         final_dataset[idx] = _to_physical(channel, final_dataset[idx])
 
     for idx, channel in squared_channels:
-        measurement_channel = _get_measurement_channel(channel.device_id)
-        measurement_dataset_idx = next(
-            filter(
-                lambda c: c[1].device_id == measurement_channel,
-                enumerate(data_file.header.channels),
-            )
-        )[0]
         final_dataset[idx] = _to_standard_deviation(
             channel,
             final_dataset[idx],
@@ -97,15 +90,3 @@ def _to_standard_deviation(
         case default:
             raise ValueError(f"Channel not handled: {default}")
     return _s
-
-
-def _get_measurement_channel(device_id: DeviceId) -> DeviceId:
-    match device_id.type:
-        case MeasurementTypeEnum.ANALOG_SQUARED:
-            return DeviceId(**(device_id.dict() | {"type": MeasurementTypeEnum.ANALOG}))
-        case MeasurementTypeEnum.PHOTONCOUNTING_SQUARED:
-            return DeviceId(
-                **(device_id.dict() | {"type": MeasurementTypeEnum.PHOTONCOUNTING})
-            )
-        case default:
-            raise ValueError(f"Cannot find measurement channel for {default}")
