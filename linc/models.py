@@ -3,7 +3,7 @@ from datetime import datetime
 
 import numpy as np
 import numpy.typing as npt
-from pydantic import BaseModel, validator, Field
+from pydantic import BaseModel, validator
 
 
 class LaserPolarizationEnum(str, Enum):
