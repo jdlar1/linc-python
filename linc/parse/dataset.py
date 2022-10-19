@@ -1,3 +1,4 @@
+from pdb import set_trace
 from typing import Any
 
 import numpy as np
@@ -18,6 +19,11 @@ def parse_dataset(dataset: bytes, header: Header) -> npt.NDArray[np.uint8]:
         current_array = np.frombuffer(dataset, dtype=dt, count=channel.bins)
         parsed[idx, : current_array.shape[0]] = current_array
 
-        *_, dataset = dataset[bytes_size:].partition(b"\r\n")
+        before, symbol, dataset = dataset[bytes_size:].partition(b"\r\n")
+        # print("parsed: ")
+        # print(parsed)
+        # print(before, symbol)
+    
+    # set_trace()s
 
     return parsed

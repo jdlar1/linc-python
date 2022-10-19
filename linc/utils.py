@@ -1,4 +1,4 @@
-from typing import TypeVar, Iterator
+from typing import Any, TypeVar, Iterator
 
 from linc.models import MeasurementTypeEnum
 
@@ -19,7 +19,7 @@ def split_seq(seq: list[T], sep: T) -> Iterator[list[T]]:
             break
 
 
-def safe_get_list(l: list[U], idx: int, default: U) -> U:
+def safe_get_list(l: list[U], idx: int, default: U | None) -> U | None:
     try:
         return l[idx]
     except IndexError:

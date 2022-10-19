@@ -1,3 +1,4 @@
+from pdb import set_trace
 import numpy as np
 import numpy.typing as npt
 
@@ -49,8 +50,8 @@ def _to_physical(
                 channel.shots * (2**channel.adc_bits - 1)
             )
         case MeasurementTypeEnum.PHOTONCOUNTING:
-            _d = (dataset * channel.adc_bits) / (
-                channel.shots * (2**channel.adc_bits - 1)
+            _d = (dataset) / (
+                channel.shots * 1e6 * channel.binwidth   # Microseconds conversion output in MHz
             )
         case MeasurementTypeEnum.POWERMETER:
             _d = dataset / channel.shots  # Just apply normalization

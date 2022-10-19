@@ -9,7 +9,7 @@ from cftime import date2index, date2num
 
 from ..models import Channel
 from ..reader import read_file
-from ..utils import to_acquisition_type_string
+from ..utils import safe_get_list, to_acquisition_type_string
 from ..write.common import get_bin_width
 from .types import Config
 
@@ -23,10 +23,10 @@ DEFAULT_CONFIG: Config = {
     "lidar": {
         "attrs": {"converter": "linc"},
         "channels": [
-            {"wavelength": 532, "link_to": "BT0"},
-            {"wavelength": 532, "link_to": "S2A0"},
-            {"wavelength": 532, "link_to": "BT1"},
-            {"wavelength": 532, "link_to": "S2A1"},
+            # {"wavelength": 532, "link_to": "BT0"},
+            # {"wavelength": 532, "link_to": "S2A0"},
+            # {"wavelength": 532, "link_to": "BT1"},
+            # {"wavelength": 532, "link_to": "S2A1"},
         ],
     },
     "config": {
@@ -53,9 +53,7 @@ def write_nc(
     range_dim = nc.createDimension("range", first_file.dataset.shape[1])
 
     time_var = nc.createVariable("time", "f8", ("time",))
-    time_var.units = (
-        f"microseconds since {first_file.header.start_date.isoformat().replace('T', ' ')}"
-    )
+    time_var.units = f"microseconds since {first_file.header.start_date.isoformat().replace('T', ' ')}"
     time_var.calendar = "gregorian"
     time_var[0] = date2num(first_file.header.start_date, units=time_var.units)
 
@@ -66,7 +64,6 @@ def write_nc(
     )
 
     channels_vars = []
-
     for idx, channel in enumerate(first_file.header.channels):
         _c = get_merged_channel_config(channel, config)
         channel_str = format_channel(
@@ -78,26 +75,32 @@ def write_nc(
 
         channels_vars.append(signal_var)
 
-
     for idx_f, iter_file in enumerate(_f):
         current_file = read_file(iter_file)
-        time_var[idx_f + 1] = date2num(current_file.header.start_date, units=time_var.units)
+        time_var[idx_f + 1] = date2num(
+            current_file.header.start_date, units=time_var.units
+        )
         for idx_c, channel in enumerate(current_file.header.channels):
             _c = get_merged_channel_config(channel, config)
-            channel_str = format_channel(
-                _c, format=config["config"]["default_channel_name_format"]
-            )
-
-            channels_vars[idx_c][idx_f + 1, :] = current_file.dataset[idx_c] # type: ignore
+            channels_vars[idx_c][idx_f + 1, :] = current_file.dataset[idx_c]  # type: ignore
 
     nc.close()
 
 
 def get_merged_channel_config(channel: Channel, config: Config) -> Channel:
     channel_as_str = f"{channel.device_id.type}{channel.device_id.number}"
-    channel_config = list(
-        filter(lambda c: c["link_to"] == channel_as_str, config["lidar"]["channels"])
-    )[0]
+    channel_config = safe_get_list(
+        list(
+            filter(
+                lambda c: c["link_to"] == channel_as_str, config["lidar"]["channels"]
+            )
+        ),
+        0,
+        None,
+    )
+
+    if channel_config is None:
+        return channel
 
     return Channel(**channel.copy(update=channel_config).dict())  # type: ignore
 
