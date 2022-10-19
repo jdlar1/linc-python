@@ -2,7 +2,6 @@ import time
 import warnings
 from collections.abc import Iterable
 from pathlib import Path
-from pdb import set_trace
 
 import numpy as np
 from cftime import date2index, date2num
@@ -11,7 +10,7 @@ from ..models import Channel
 from ..reader import read_file
 from ..utils import safe_get_list, to_acquisition_type_string
 from ..write.common import get_bin_width
-from .types import Config
+from ..config.model import Config
 
 # FIXME: This is broken in this Netcdf4 version
 with warnings.catch_warnings():
@@ -19,29 +18,14 @@ with warnings.catch_warnings():
     from netCDF4 import Dataset  # type: ignore
 
 
-DEFAULT_CONFIG: Config = {
-    "lidar": {
-        "attrs": {"converter": "linc"},
-        "channels": [
-            # {"wavelength": 532, "link_to": "BT0"},
-            # {"wavelength": 532, "link_to": "S2A0"},
-            # {"wavelength": 532, "link_to": "BT1"},
-            # {"wavelength": 532, "link_to": "S2A1"},
-        ],
-    },
-    "config": {
-        "include_undefined_channels": True,
-        "default_channel_name_format": r"%wx%p%a",
-    },
-}
-
-
-def write_nc(
+def write_nc_legacy(
     files: Iterable[Path | str],
     output_file: Path | str,
-    config: Config = DEFAULT_CONFIG,
+    config: Config | dict = Config(),
 ) -> None:
     _f = list(files)
+    config = Config(**config) if isinstance(config, dict) else config
+
     first_file = read_file(_f[0])
 
     nc = Dataset(output_file, "w")
@@ -52,13 +36,13 @@ def write_nc(
     time_dim = nc.createDimension("time", None)
     range_dim = nc.createDimension("range", first_file.dataset.shape[1])
 
-    time_var = nc.createVariable("time", "f8", ("time",))
+    time_var = nc.createVariable("time", "f8", ("time",), compression="zlib")
     time_var.units = f"microseconds since {first_file.header.start_date.isoformat().replace('T', ' ')}"
     time_var.calendar = "gregorian"
     time_var[0] = date2num(first_file.header.start_date, units=time_var.units)
 
     # TODO: Verify if bin0 means bw or 0
-    range_var = nc.createVariable("range", "f8", ("range",))
+    range_var = nc.createVariable("range", "f8", ("range",), compression="zlib")
     range_var[:] = np.arange(
         bin_width, bin_width * (first_file.dataset.shape[1] + 1), bin_width
     )
@@ -67,10 +51,12 @@ def write_nc(
     for idx, channel in enumerate(first_file.header.channels):
         _c = get_merged_channel_config(channel, config)
         channel_str = format_channel(
-            _c, format=config["config"]["default_channel_name_format"]
+            _c, format=config.config.default_channel_name_format
         )
 
-        signal_var = nc.createVariable(f"signal_{channel_str}", "f8", ("time", "range"))
+        signal_var = nc.createVariable(
+            f"signal_{channel_str}", "f8", ("time", "range"), compression="zlib"
+        )
         signal_var[0, :] = first_file.dataset[idx]
 
         channels_vars.append(signal_var)
@@ -90,11 +76,7 @@ def write_nc(
 def get_merged_channel_config(channel: Channel, config: Config) -> Channel:
     channel_as_str = f"{channel.device_id.type}{channel.device_id.number}"
     channel_config = safe_get_list(
-        list(
-            filter(
-                lambda c: c["link_to"] == channel_as_str, config["lidar"]["channels"]
-            )
-        ),
+        list(filter(lambda c: c.link_to == channel_as_str, config.lidar.channels)),
         0,
         None,
     )

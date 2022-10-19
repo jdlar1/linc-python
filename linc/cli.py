@@ -1,6 +1,7 @@
 from pathlib import Path
 
 import typer
+import pkg_resources
 
 app = typer.Typer(
     name="linc CLI",
@@ -8,18 +9,35 @@ app = typer.Typer(
 )
 
 
-# @app.command(no_args_is_help=True)
-# def main(
-#     source_path: list[Path] = typer.Argument(..., dir_okay=False, readable=True),
-#     output_path: Path = typer.Option(..., "--output", "-o", file_okay=True),
-#     config_file: Path = typer.Option(
-#         None,
-#         "--config",
-#         "-c",
-#     ),
-# ):
-#     convert_to_nc(source_path, output_file=output_path, config_file=config_file)
+@app.command(no_args_is_help=True)
+def convert(
+    source_path: list[Path] = typer.Argument(..., dir_okay=False, readable=True),
+    output_path: Path = typer.Option(..., "--output", "-o", file_okay=True),
+    config_file: Path = typer.Option(
+        None,
+        "--config",
+        "-c",
+    ),
+    legacy: bool = typer.Option(False)
+):
+    ...
+    # (source_path, output_file=output_path, config_file=config_file)
+
+def version_callback(value: bool):
+    if value:
+        version = pkg_resources.get_distribution("fastapi-cli").version
+        typer.echo(f"fastapi-cli, version {version}")
+        raise typer.Exit()
 
 
-if __name__ == "__main__":
-    app()
+@app.callback()
+def main(
+    version: bool = typer.Option(
+        None,
+        "--version",
+        callback=version_callback,
+        is_eager=True,
+        help="Show the Manage FastAPI version information.",
+    )
+):
+    ...
