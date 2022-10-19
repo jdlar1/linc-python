@@ -2,7 +2,7 @@
 name = "linc"
 version = "0.1.0"
 description = "A package to handle LICEL Binary format"
-authors = ["Your Name <you@example.com>"]
+authors = ["Juan Diego jdidelarc@gmail.com"]
 license = "MIT"
 readme = "README.md"
 
