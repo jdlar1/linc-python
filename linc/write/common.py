@@ -1,4 +1,6 @@
-from ..models import Header
+from ..config import Config
+from ..models import Channel, Header
+from ..utils import safe_get_list, to_acquisition_type_string
 
 
 def compare_joinable_dataset(header1: Header, header2: Header) -> None:
@@ -17,5 +19,30 @@ def get_bin_width(header: Header) -> float:
     for channel in header.channels:
         if channel.binwidth != bw:
             raise ValueError("Not all bins have the same width")
-    
+
     return bw
+
+
+def get_merged_channel_config(channel: Channel, config: Config) -> Channel:
+    channel_as_str = f"{channel.device_id.type}{channel.device_id.number}"
+    channel_config = safe_get_list(
+        list(filter(lambda c: c.link_to == channel_as_str, config.lidar.channels)),
+        0,
+        None,
+    )
+
+    if channel_config is None:
+        return channel
+
+    return Channel(**channel.copy(update=channel_config).dict())  # type: ignore
+
+
+def format_channel(channel: Channel, format: str) -> str:
+    format = format.replace(r"%w", str(channel.wavelength))
+    format = format.replace(r"%p", channel.polarization.value)
+    format = format.replace(r"%a", to_acquisition_type_string(channel.device_id.type))
+    format = format.replace(
+        r"%i", f"{channel.device_id.type}{channel.device_id.number}"
+    )
+
+    return format

@@ -1,0 +1,8 @@
+[lidar.attrs]
+location = "Medellín"
+
+[[lidar.channel]]
+
+
+
+[config]
