@@ -18,10 +18,11 @@ def convert(
         "--config",
         "-c",
     ),
-    legacy: bool = typer.Option(False)
+    legacy: bool = typer.Option(False, "--legacy", "-l"),
 ):
     ...
     # (source_path, output_file=output_path, config_file=config_file)
+
 
 def version_callback(value: bool):
     if value:

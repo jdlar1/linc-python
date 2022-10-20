@@ -111,4 +111,4 @@ class DataFileU32(BaseModel):
 
 
 class DataFile(DataFileU32):
-    dataset: npt.NDArray[np.float64]
+    dataset: npt.NDArray[np.float32]

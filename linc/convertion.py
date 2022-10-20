@@ -11,7 +11,7 @@ SQUARED_CHANNELS = [
 
 
 def convert_to_physical_units(data_file: DataFileU32) -> DataFile:
-    final_dataset = data_file.dataset.copy().astype(np.float64)
+    final_dataset = data_file.dataset.copy().astype(np.float32)
 
     squared_channels = list(
         filter(
@@ -42,8 +42,8 @@ def convert_to_physical_units(data_file: DataFileU32) -> DataFile:
 
 
 def _to_physical(
-    channel: Channel, dataset: npt.NDArray[np.float64]
-) -> npt.NDArray[np.float64]:
+    channel: Channel, dataset: npt.NDArray[np.float32]
+) -> npt.NDArray[np.float32]:
     match channel.device_id.type:
         case MeasurementTypeEnum.ANALOG:
             _d = (1000 * dataset * channel.dc_dr) / (
@@ -66,9 +66,9 @@ def _to_physical(
 
 def _to_standard_deviation(
     channel: Channel,
-    dataset: npt.NDArray[np.float64],
+    dataset: npt.NDArray[np.float32],
     # measurement_dataset: npt.NDArray[np.float64],
-) -> npt.NDArray[np.float64]:
+) -> npt.NDArray[np.float32]:
     match channel.device_id.type:
         case MeasurementTypeEnum.ANALOG_SQUARED:
             _s = (

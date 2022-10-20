@@ -4,15 +4,7 @@ from pathlib import Path
 from pydantic import BaseModel
 
 from tomli import load
-
-
-class LidarConfig(BaseModel):
-    attrs: dict
-
-
-class Config(BaseModel):
-    lidar: LidarConfig
-
+from .models import Config
 
 FALLBACK_CONFIG = Path(__file__).parent / "default-config.toml"
 CURRENT_DIR_CONFIG = Path("./lidar-conf.toml")

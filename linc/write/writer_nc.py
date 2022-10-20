@@ -1,3 +1,4 @@
+from pdb import set_trace
 import time
 import warnings
 from collections.abc import Iterable
@@ -10,7 +11,7 @@ from ..models import Channel
 from ..reader import read_file
 from ..utils import safe_get_list, to_acquisition_type_string
 from ..write.common import get_bin_width
-from ..config.model import Config
+from ..config.models import Config
 
 # FIXME: This is broken in this Netcdf4 version
 with warnings.catch_warnings():
@@ -42,7 +43,9 @@ def write_nc_legacy(
     time_var[0] = date2num(first_file.header.start_date, units=time_var.units)
 
     # TODO: Verify if bin0 means bw or 0
-    range_var = nc.createVariable("range", "f8", ("range",), compression="zlib")
+    range_var = nc.createVariable(
+        "range", "f8", ("range",), compression="zlib", complevel=1
+    )
     range_var[:] = np.arange(
         bin_width, bin_width * (first_file.dataset.shape[1] + 1), bin_width
     )
@@ -55,7 +58,7 @@ def write_nc_legacy(
         )
 
         signal_var = nc.createVariable(
-            f"signal_{channel_str}", "f8", ("time", "range"), compression="zlib"
+            f"signal_{channel_str}", "f4", ("time", "range"), compression="zlib"
         )
         signal_var[0, :] = first_file.dataset[idx]
 
@@ -67,7 +70,7 @@ def write_nc_legacy(
             current_file.header.start_date, units=time_var.units
         )
         for idx_c, channel in enumerate(current_file.header.channels):
-            _c = get_merged_channel_config(channel, config)
+            # channel_id = f"{channel.device_id.type}{channel.device_id.number}"
             channels_vars[idx_c][idx_f + 1, :] = current_file.dataset[idx_c]  # type: ignore
 
     nc.close()
