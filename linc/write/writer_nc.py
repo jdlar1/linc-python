@@ -42,7 +42,6 @@ def write_nc_legacy(
     time_var.calendar = "gregorian"
     time_var[0] = date2num(first_file.header.start_date, units=time_var.units)
 
-    # TODO: Verify if bin0 means bw or 0
     range_var = nc.createVariable(
         "range", "f8", ("range",), compression="zlib", complevel=1
     )
@@ -58,7 +57,10 @@ def write_nc_legacy(
         )
 
         signal_var = nc.createVariable(
-            f"signal_{channel_str}", "f8", ("time", "range"), compression="zlib", 
+            f"signal_{channel_str}",
+            "f8",
+            ("time", "range"),
+            compression="zlib",
         )
         signal_var[0, :] = first_file.dataset[idx]
 
@@ -93,47 +95,46 @@ def write_nc(
     bin_width = get_bin_width(first_file.header)
 
     time_dim = nc.createDimension("time", None)
-    channel_dim = nc.createDimension("signal", first_file.dataset.shape[0])
+    channel_dim = nc.createDimension("channel", first_file.dataset.shape[0])
     range_dim = nc.createDimension("range", first_file.dataset.shape[1])
 
-
-    time_var = nc.createVariable("time", "f8", ("time",), compression="zlib")
+    time_var = nc.createVariable(
+        "time", "f8", ("time",), compression="zlib", complevel=1
+    )
     time_var.units = f"microseconds since {first_file.header.start_date.isoformat().replace('T', ' ')}"
     time_var.calendar = "gregorian"
     time_var[0] = date2num(first_file.header.start_date, units=time_var.units)
 
-    # TODO: Verify if bin0 means bw or 0
+    channel_var = nc.createVariable(
+        "channel", str, "channel"
+    )
+    channels_vars: list[str] = []
+    for channel in first_file.header.channels:
+        _c = get_merged_channel_config(channel, config)
+        channel_str = format_channel(
+            _c, format=config.config.default_channel_name_format
+        )
+        channels_vars.append(channel_str)
+    channel_var[:] = np.array(channels_vars, dtype=object)
+
     range_var = nc.createVariable(
-        "range", "S1", ("range",), compression="zlib", complevel=1
+        "range", "f8", ("range",), compression="zlib", complevel=1
     )
     range_var[:] = np.arange(
         bin_width, bin_width * (first_file.dataset.shape[1] + 1), bin_width
     )
 
-
-
-    channels_vars = []
-    for idx, channel in enumerate(first_file.header.channels):
-        _c = get_merged_channel_config(channel, config)
-        channel_str = format_channel(
-            _c, format=config.config.default_channel_name_format
-        )
-
-        signal_var = nc.createVariable(
-            f"signal_{channel_str}", "f8", ("time", "range"), compression="zlib", 
-        )
-        signal_var[0, :] = first_file.dataset[idx]
-
-        channels_vars.append(signal_var)
+    signal_var = nc.createVariable("signal", "f8", ("time", "channel", "range"), compression="zlib", complevel=4)
 
     for idx_f, iter_file in enumerate(_f):
         current_file = read_file(iter_file)
         time_var[idx_f + 1] = date2num(
             current_file.header.start_date, units=time_var.units
         )
-
-        for idx_c, channel in enumerate(current_file.header.channels):
-            # channel_id = f"{channel.device_id.type}{channel.device_id.number}"
-            channels_vars[idx_c][idx_f + 1, :] = current_file.dataset[idx_c]  # type: ignore
+        
+        signal_var[idx_f + 1, :, :] = current_file.dataset
+        # for idx_c, channel in enumerate(current_file.header.channels):
+        #     # channel_id = f"{channel.device_id.type}{channel.device_id.number}"
+        #     channels_vars[idx_c][idx_f + 1, :] = current_file.dataset[idx_c]  # type: ignore
 
     nc.close()
