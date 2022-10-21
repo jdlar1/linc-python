@@ -5,7 +5,7 @@ from collections.abc import Iterable
 from pathlib import Path
 
 import numpy as np
-from cftime import date2index, date2num
+from cftime import date2num
 
 from ..reader import read_file
 from ..write.common import get_bin_width
@@ -126,13 +126,24 @@ def write_nc(
 
     signal_var = nc.createVariable("signal", "f8", ("time", "channel", "range"), compression="zlib", complevel=4)
 
+    signal_var[0, :, :] = first_file.dataset
+
+    # set_trace()
     for idx_f, iter_file in enumerate(_f):
         current_file = read_file(iter_file)
         time_var[idx_f + 1] = date2num(
             current_file.header.start_date, units=time_var.units
         )
         
-        signal_var[idx_f + 1, :, :] = current_file.dataset
+        try:
+            signal_var[idx_f + 1, :, :] = current_file.dataset
+        except:
+            raise NotImplementedError("To Implement in future versions")
+            """
+            This is difficult since channels could or not be defined in the first file
+            (Apply for raman channels on MULHACEN Lidar)
+            But it works well in LIMON and other lidars with constant number of channels
+            """
         # for idx_c, channel in enumerate(current_file.header.channels):
         #     # channel_id = f"{channel.device_id.type}{channel.device_id.number}"
         #     channels_vars[idx_c][idx_f + 1, :] = current_file.dataset[idx_c]  # type: ignore
