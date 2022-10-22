@@ -1,6 +1,6 @@
 from ..config import Config
 from ..models import Channel, Header
-from ..utils import safe_get_list, to_acquisition_type_string
+from ..utils import device_id_to_str, safe_get_list, to_acquisition_type_string
 
 
 def compare_joinable_dataset(header1: Header, header2: Header) -> None:
@@ -24,7 +24,7 @@ def get_bin_width(header: Header) -> float:
 
 
 def get_merged_channel_config(channel: Channel, config: Config) -> Channel:
-    channel_as_str = f"{channel.device_id.type}{channel.device_id.number}"
+    channel_as_str = device_id_to_str(channel.device_id)
     channel_config = safe_get_list(
         list(filter(lambda c: c.link_to == channel_as_str, config.lidar.channels)),
         0,

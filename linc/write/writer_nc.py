@@ -72,7 +72,7 @@ def write_nc_legacy(
             current_file.header.start_date, units=time_var.units
         )
         for idx_c, channel in enumerate(current_file.header.channels):
-            # channel_id = f"{channel.device_id.type}{channel.device_id.number}"
+           
             channels_vars[idx_c][idx_f + 1, :] = current_file.dataset[idx_c]  # type: ignore
 
     nc.close()
@@ -145,7 +145,7 @@ def write_nc(
             But it works well in LIMON and other lidars with constant number of channels
             """
         # for idx_c, channel in enumerate(current_file.header.channels):
-        #     # channel_id = f"{channel.device_id.type}{channel.device_id.number}"
+        #     
         #     channels_vars[idx_c][idx_f + 1, :] = current_file.dataset[idx_c]  # type: ignore
 
     nc.close()

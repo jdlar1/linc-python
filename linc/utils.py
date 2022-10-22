@@ -1,6 +1,6 @@
-from typing import Any, TypeVar, Iterator
+from typing import TypeVar, Iterator
 
-from linc.models import MeasurementTypeEnum
+from .models import DeviceId, MeasurementTypeEnum
 
 
 U = TypeVar("U")
@@ -29,12 +29,16 @@ def safe_get_list(l: list[U], idx: int, default: U | None) -> U | None:
 def to_acquisition_type_string(type: MeasurementTypeEnum) -> str:
     match type:
         case MeasurementTypeEnum.ANALOG:
-            return 'a'
+            return "a"
         case MeasurementTypeEnum.ANALOG_SQUARED:
-            return 'A'
+            return "A"
         case MeasurementTypeEnum.PHOTONCOUNTING:
-            return 'p'
+            return "p"
         case MeasurementTypeEnum.PHOTONCOUNTING_SQUARED:
-            return 'P'
+            return "P"
         case _:
             raise ValueError("Input type not supported")
+
+
+def device_id_to_str(device_id: DeviceId) -> str:
+    return f"{device_id.type}{device_id.number}"
