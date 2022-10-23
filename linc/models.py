@@ -2,6 +2,7 @@ from enum import Enum
 from datetime import datetime
 
 import numpy as np
+import pandas as pd
 import numpy.typing as npt
 from pydantic import BaseModel, validator
 
@@ -62,6 +63,9 @@ class Channel(BaseModel):
     dc_dr: float  # Discriminator level () or data range
     device_id: DeviceId
 
+    class Config:
+        allow_mutation = False
+
 
 class Header(BaseModel):
     filename: str
@@ -79,6 +83,7 @@ class Header(BaseModel):
 
     class Config:
         anystr_strip_whitespace = True  # remove trailing whitespace
+        allow_mutation = False
 
     # TODO: write custom validator for channels with associated lasers
     # @validator('channels')
@@ -88,7 +93,7 @@ class Header(BaseModel):
 
 class DataFileU32(BaseModel):
     header: Header
-    dataset: npt.NDArray[np.uint8]
+    dataset: pd.DataFrame
 
     @validator("dataset")
     def dataset_length_must_match_header(cls, v, values):
@@ -96,8 +101,8 @@ class DataFileU32(BaseModel):
 
         # Header shape: (datasets x max bin of single profile)
         header_shape = (
-            _header.n_datasets,
             max(map(lambda x: x.bins, _header.channels)),
+            _header.n_datasets,
         )
         if v.shape != header_shape:
             raise ValueError(
@@ -108,7 +113,8 @@ class DataFileU32(BaseModel):
 
     class Config:
         arbitrary_types_allowed = True
+        allow_mutation = False
 
 
 class DataFile(DataFileU32):
-    dataset: npt.NDArray[np.float32]
+    dataset: pd.DataFrame

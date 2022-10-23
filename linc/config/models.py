@@ -12,8 +12,8 @@ class SubConfig(BaseModel):
 
 
 class LidarChannels(BaseModel):
-    wavelength: int
-    link_to: str
+    nick: str
+    link_to: str # The device ID
 
 
 class LidarConfig(BaseModel):
